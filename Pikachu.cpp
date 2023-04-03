@@ -56,6 +56,24 @@ void DisableResizeWindow()
     SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
 }
 
+void changeColor(int color)
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+//Ham tinh kich thuoc man hinh console
+void calculateColumnsConsole(int &columns, int &rows)
+{
+    //CONSOLE_SCREEN_BUFFER_INFO la mot kieu du lieu chua thong tin ve bo dem man hinh
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    //Ham GetConsoleScreenBufferInfo se lay thong tin bo dem man hinh console, bien csbi se luu thong tin kich thuoc va vi tri cua man hinh console
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+}
 
 struct Board
 {
@@ -67,9 +85,21 @@ struct Board
 }Pikachu;
 
 //Khoi tao gia tri bang
-void setValueBoard (int **&Arr, int size)
+void setValueBoard (int **&Arr, int *&sub_arr, int size)
 {
+    //Khai bao bien count de dem so luong pokemon da set, sub_size de luu so loai pokemon
+    int count = 0;
+    int sub_size = size * 2;
+
+    //Cap phat dong cho mang
     Arr = new int *[size + 2];
+    sub_arr = new int [sub_size];
+
+    //Set so luong cua cac loai pokemon ban dau la 0, vi chua co pokemon nao
+    for (int i = 0; i < sub_size; i++)
+    {
+        sub_arr[i] = 0;
+    }
 
     //muc dich tao ra mot hinh chu nhat phu ben ngoai de ho tro matching
     for (int i = 0; i <= size + 1; i++)
@@ -87,7 +117,43 @@ void setValueBoard (int **&Arr, int size)
             }
             else
             {
-                Arr[i][j] = rand() % size;
+                //De lai mot so luong sub_size phan tu de lam chan so luong cac pokemon
+                if (count < (size * size - sub_size))
+                {
+                    //random cac loai pokemon va dem so luong da ramdon
+                    Arr[i][j] = rand() % sub_size;
+                    count++;
+
+                    //Dem so luong cac loai pokemon, chi so index trong mang sub_arr ung voi gia tri cua pokemon, con gia tri tai index do se ung voi so luong loai do
+                    sub_arr[Arr[i][j]]++;
+                }
+                //chi random den mot so luong size * size - sub_size sau do ktra xem pokemon nao dang le thi se tang them mot, neu khong con pokemon nao le, se tao so le sau do lam chan
+                else
+                {
+                    int sub_count = count;
+                    for (int p = 0; p < sub_size; p++)
+                    {
+                        if ((sub_arr[p] % 2) != 0 )
+                        {
+                            //neu so luong cua loai pokemon p la le, se tang len 1 de lam chan
+                            Arr[i][j] = p;
+                            sub_arr[p]++;
+
+                            //tang bien sub_count de khang dinh rang con pokemon co so luong le
+                            sub_count++;
+                            break;
+                        }
+                    }
+
+                    //Neu nhu khong con pokemon nao le, hay lam cho no le :D
+                    if (sub_count == count)
+                    {
+                        //random va dem so luong cac loai pokemon
+                        Arr[i][j] = rand() % sub_size;
+                        sub_arr[Arr[i][j]]++;
+                    }
+                    count++;
+                }
             }
         }
     }
@@ -508,7 +574,7 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
             break;
         }
         int j = cur_x + 1;
-        for (; j > old_x; j++)
+        for (; j < old_x; j++)
         {
             if (a[j][i] != -1)
             {
@@ -737,25 +803,6 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
         }
      }
  }
-void changeColor(int color)
-{
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, color);
-}
-
-//Ham tinh kich thuoc man hinh console
-void calculateColumnsConsole(int &columns, int &rows)
-{
-    //CONSOLE_SCREEN_BUFFER_INFO la mot kieu du lieu chua thong tin ve bo dem man hinh
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-    //Ham GetConsoleScreenBufferInfo se lay thong tin bo dem man hinh console, bien csbi se luu thong tin kich thuoc va vi tri cua man hinh console
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
-    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-}
-
 
 void drawFrame (int pos_x, int pos_y, string str)
 {
@@ -867,8 +914,8 @@ void drawMenu(int middle)
 //Ham ve bang
 void drawBoard (int Size, int start_point, int **a)
 {
-    SetWindowSize(140, 80);
-    SetScreenBufferSize (142, 82);
+//    SetWindowSize(140, 80);
+//    SetScreenBufferSize (142, 82);
     for (int j = 0; j < Size; j++)
     {
         for (int i = 0; i < Size; i++)
@@ -948,6 +995,12 @@ void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int siz
             {
                 cur_x++;
             }
+        }
+        //Tai lai neu man hinh hien thi loi
+        if(c == 'r' || c == 'R')
+        {
+            system("cls");
+            drawBoard(size, start_point, a);
         }
         //Enter hoac Space
         if(c == 13 || c == 32)
@@ -1092,7 +1145,7 @@ int main()
     int columns, rows;
     int start_point;
     int pos_menu_x, pos_menu_y, temp = 1;
-    int **Arr = NULL, size = 6;
+    int **Arr = NULL, *sub_arr, size = 8;
 
     calculateColumnsConsole(columns, rows);
     cout  << "Kich thuoc man hinh la: " << columns;
@@ -1104,7 +1157,7 @@ int main()
     Pikachu.cur_y = 5;
 
     //Truyen vao vi tri chinh giua man hinh
-    setValueBoard (Arr, size);
+    setValueBoard (Arr, sub_arr, size);
     drawMenu(columns/2);
     selectOption(pos_menu_x, pos_menu_y);
     bool check = true;
@@ -1212,4 +1265,5 @@ int main()
     _getch();
     deleleDinamicArr (Arr, size);
     delete[] Arr;
+    delete[] sub_arr;
 }
