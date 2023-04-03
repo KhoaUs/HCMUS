@@ -25,6 +25,202 @@
 #define FOREGROUND_BLACK 0x00
 using namespace std;
 
+struct Board
+{
+    unsigned int old_x; //Khai bao vi tri cu cua con tro theo toa do theo truc Ox
+    unsigned int old_y; //Khai bao vi tri cu cua con tro theo toa do theo truc Oy
+    unsigned int cur_x; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Ox
+    unsigned int cur_y; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Oy
+
+}Pikachu;
+
+void SetWindowSize(SHORT width, SHORT height);
+void SetScreenBufferSize(SHORT width, SHORT height);
+void DisableResizeWindow();
+
+void changeColor(int color);
+
+//Ham tinh kich thuoc man hinh console
+void calculateColumnsConsole(int &columns, int &rows);
+
+//Khoi tao gia tri bang
+void setValueBoard (int **&Arr, int *&sub_arr, int size);
+
+//Ham tro con tro van ban den vi tri co toa do x, y
+void gotoXY(int x, int y);
+
+bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start_point);
+
+
+bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point);
+
+
+bool matchShapeZ (int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point);
+
+
+void matchWholeShape(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int &temp, int size);
+ 
+
+void drawFrame (int pos_x, int pos_y, string str);
+
+
+//Ham ve hinh chu nhat
+void drawRec(int begin_x, int begin_y, int end_x, int end_y, char ch_1, char ch_2);
+
+void highLightBlock(int x, int y, int **arr, int color, int start_point);
+
+//Ve man hinh bat dau;
+void drawMenu(int middle);
+
+//Ham ve bang
+void drawBoard (int Size, int start_point, int **a);
+
+void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int size, int start_point);
+
+//lam noi bat khung chon menu
+void selectOption (int _x, int _y);
+
+//thu hoi bo nho
+void deleleDinamicArr(int **Arr, int size);
+
+
+int main()
+{
+    cout << "Hay bat full man hinh de co trai nghiem tot nhat! " << endl;
+    system("pause");
+    system("cls");
+    srand(time(NULL));
+
+    //Khai bao bien luu kich thuoc man hinh console
+    int columns, rows;
+    int start_point;
+    int pos_menu_x, pos_menu_y, temp = 1;
+    int **Arr = NULL, *sub_arr, size = 8;
+
+    calculateColumnsConsole(columns, rows);
+    cout  << "Kich thuoc man hinh la: " << columns;
+    start_point = columns/2 - size * 4;
+    pos_menu_x = columns/2 - 3;
+    pos_menu_y = 21;
+
+    Pikachu.cur_x = start_point;
+    Pikachu.cur_y = 5;
+
+    //Truyen vao vi tri chinh giua man hinh
+    setValueBoard (Arr, sub_arr, size);
+    drawMenu(columns/2);
+    selectOption(pos_menu_x, pos_menu_y);
+    bool check = true;
+    while (true)
+    {
+        if(_kbhit())
+        {
+            char c = _getch();
+            check = true;
+
+            gotoXY(pos_menu_x, pos_menu_y);
+            cout << "__________";
+
+            gotoXY(pos_menu_x, pos_menu_y - 2);
+            cout << "__________";
+
+            if (check)
+            {
+                if(c == 72)
+                {
+                    if(pos_menu_y == 21)
+                    {
+                        pos_menu_y = 21 + 8;
+                    }
+                    else
+                    {
+                        pos_menu_y -= 2;
+                    }
+
+                    selectOption(pos_menu_x, pos_menu_y);
+
+                    //Kiểm tra điều kiện để tránh in dư tại vị trí đáy
+                    if(pos_menu_y != 29)
+                    {
+                        gotoXY(pos_menu_x, pos_menu_y + 2);
+                        cout << "__________";
+                    }
+                    check = false;
+                }
+
+                if(c == 80)
+                {
+                    if(pos_menu_y == 29)
+                    {
+                        pos_menu_y = 29 - 8;
+                    }
+                    else
+                    {
+                        pos_menu_y += 2;
+                    }
+
+                    selectOption(pos_menu_x, pos_menu_y);
+                    gotoXY(pos_menu_x, pos_menu_y - 2);
+                    cout << "__________";
+                    check = false;
+                }
+
+                if (c == 13 || c == 32)
+                {
+                        break;
+                }
+            }
+        }
+    }
+    switch (pos_menu_y)
+    {
+        case 21:
+            //cho nguoi choi chon do kho
+            system("cls");
+            drawBoard(size, start_point, Arr);
+            operateBoard(Arr, 1, 1, 1, 1, size, start_point);
+            //de quay lai menu bap esc hoac chon "tro ve"
+            break;
+        case 23:
+            //dan toi trang dang nhap de nhap tai khoan
+            //de quay lai menu bap esc hoac chon "tro ve"
+            break;
+        case 25:
+            //dan toi trang dang nhap de nhap tai khoan, va hien thi thanh tich nguoi choi
+            //de quay lai menu bap esc hoac chon "tro ve"
+            break;
+        case 27:
+            //hien thi BXH, de quay lai menu bap esc hoac chon "tro ve"
+            break;
+        case 29:
+            //thoat
+            system("cls");
+            return 0;
+            break;
+        default:
+            cout << "Loi he thong, vui long reset va bao voi doi ngu ho tro!" << endl;
+            return 0;
+    }
+
+    //drawBoard(size, start_point);
+
+
+
+    /*drawRec(start_point, 3, start_point + 8, 7, '*', '*');
+
+    //Dung chtr 0.5s truoc khi thuc hien lenh tiep theo
+    this_thread::sleep_for(chrono::milliseconds(500));
+    drawRec(start_point, 3, start_point + 8, 7, ' ', ' '); */ //ðoaòn code dung ðêÒ xoaì môòt ô trong baÒng, keÌm hiêòu ýìng
+
+    _getch();
+    deleleDinamicArr (Arr, size);
+    delete[] Arr;
+    delete[] sub_arr;
+
+    return 0;
+}
+
+
 void SetWindowSize(SHORT width, SHORT height)
 {
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -75,14 +271,6 @@ void calculateColumnsConsole(int &columns, int &rows)
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
-struct Board
-{
-    unsigned int old_x; //Khai bao vi tri cu cua con tro theo toa do theo truc Ox
-    unsigned int old_y; //Khai bao vi tri cu cua con tro theo toa do theo truc Oy
-    unsigned int cur_x; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Ox
-    unsigned int cur_y; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Oy
-
-}Pikachu;
 
 //Khoi tao gia tri bang
 void setValueBoard (int **&Arr, int *&sub_arr, int size)
@@ -734,6 +922,34 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
                 }
             }
         }
+        //Truong hop old nam tren cur
+        else if (cur_y > old_y)
+        {
+            int j = cur_y - 1;
+            for (; j > old_y; j--)
+            {
+                if (a[i][j] != -1)
+                { 
+                    break;
+                }
+            }
+            //neu duyet duoc toi vi tri toa do bang old_y thi tiep tuc duyet ngang
+            if (j == old_y)
+            {
+                int k = i;
+                for (; k < old_x; k++)
+                {
+                    if (a[k][old_y] != -1)
+                    {
+                        break;
+                    }
+                }
+                if (k == old_x)
+                {
+                    return 1;
+                }
+            }
+        }
     }
     return 0;
 }
@@ -1132,138 +1348,4 @@ void deleleDinamicArr(int **Arr, int size)
     {
         delete[] Arr[i];
     }
-}
-
-int main()
-{
-    cout << "Hay bat full man hinh de co trai nghiem tot nhat! " << endl;
-    system("pause");
-    system("cls");
-    srand(time(NULL));
-
-    //Khai bao bien luu kich thuoc man hinh console
-    int columns, rows;
-    int start_point;
-    int pos_menu_x, pos_menu_y, temp = 1;
-    int **Arr = NULL, *sub_arr, size = 8;
-
-    calculateColumnsConsole(columns, rows);
-    cout  << "Kich thuoc man hinh la: " << columns;
-    start_point = columns/2 - size * 4;
-    pos_menu_x = columns/2 - 3;
-    pos_menu_y = 21;
-
-    Pikachu.cur_x = start_point;
-    Pikachu.cur_y = 5;
-
-    //Truyen vao vi tri chinh giua man hinh
-    setValueBoard (Arr, sub_arr, size);
-    drawMenu(columns/2);
-    selectOption(pos_menu_x, pos_menu_y);
-    bool check = true;
-    while (true)
-    {
-        if(_kbhit())
-        {
-            char c = _getch();
-            check = true;
-
-            gotoXY(pos_menu_x, pos_menu_y);
-            cout << "__________";
-
-            gotoXY(pos_menu_x, pos_menu_y - 2);
-            cout << "__________";
-
-            if (check)
-            {
-                if(c == 72)
-                {
-                    if(pos_menu_y == 21)
-                    {
-                        pos_menu_y = 21 + 8;
-                    }
-                    else
-                    {
-                        pos_menu_y -= 2;
-                    }
-
-                    selectOption(pos_menu_x, pos_menu_y);
-
-                    //Kiểm tra điều kiện để tránh in dư tại vị trí đáy
-                    if(pos_menu_y != 29)
-                    {
-                        gotoXY(pos_menu_x, pos_menu_y + 2);
-                        cout << "__________";
-                    }
-                    check = false;
-                }
-
-                if(c == 80)
-                {
-                    if(pos_menu_y == 29)
-                    {
-                        pos_menu_y = 29 - 8;
-                    }
-                    else
-                    {
-                        pos_menu_y += 2;
-                    }
-
-                    selectOption(pos_menu_x, pos_menu_y);
-                    gotoXY(pos_menu_x, pos_menu_y - 2);
-                    cout << "__________";
-                    check = false;
-                }
-
-                if (c == 13 || c == 32)
-                {
-                        break;
-                }
-            }
-        }
-    }
-    switch (pos_menu_y)
-    {
-        case 21:
-            //cho nguoi choi chon do kho
-            system("cls");
-            drawBoard(size, start_point, Arr);
-            operateBoard(Arr, 1, 1, 1, 1, size, start_point);
-            //de quay lai menu bap esc hoac chon "tro ve"
-            break;
-        case 23:
-            //dan toi trang dang nhap de nhap tai khoan
-            //de quay lai menu bap esc hoac chon "tro ve"
-            break;
-        case 25:
-            //dan toi trang dang nhap de nhap tai khoan, va hien thi thanh tich nguoi choi
-            //de quay lai menu bap esc hoac chon "tro ve"
-            break;
-        case 27:
-            //hien thi BXH, de quay lai menu bap esc hoac chon "tro ve"
-            break;
-        case 29:
-            //thoat
-            system("cls");
-            return 0;
-            break;
-        default:
-            cout << "Loi he thong, vui long reset va bao voi doi ngu ho tro!" << endl;
-            return 0;
-    }
-
-    //drawBoard(size, start_point);
-
-
-
-    /*drawRec(start_point, 3, start_point + 8, 7, '*', '*');
-
-    //Dung chtr 0.5s truoc khi thuc hien lenh tiep theo
-    this_thread::sleep_for(chrono::milliseconds(500));
-    drawRec(start_point, 3, start_point + 8, 7, ' ', ' '); */ //ðoaòn code dung ðêÒ xoaì môòt ô trong baÒng, keÌm hiêòu ýìng
-
-    _getch();
-    deleleDinamicArr (Arr, size);
-    delete[] Arr;
-    delete[] sub_arr;
 }
