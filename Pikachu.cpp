@@ -27,11 +27,8 @@ using namespace std;
 
 struct Board
 {
-    unsigned int old_x; //Khai bao vi tri cu cua con tro theo toa do theo truc Ox
-    unsigned int old_y; //Khai bao vi tri cu cua con tro theo toa do theo truc Oy
-    unsigned int cur_x; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Ox
-    unsigned int cur_y; //Khai bao vi tri hien tai cua con tro theo toa do theo truc Oy
-
+    unsigned int x; //Khai bao vi tri cu cua con tro theo toa do theo truc Ox
+    unsigned int y; //Khai bao vi tri cu cua con tro theo toa do theo truc Oy
 }Pikachu;
 
 void SetWindowSize(SHORT width, SHORT height);
@@ -49,20 +46,19 @@ void setValueBoard (int **&Arr, int *&sub_arr, int size);
 //Ham tro con tro van ban den vi tri co toa do x, y
 void gotoXY(int x, int y);
 
-bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start_point);
+bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start_point, int size);
 
 
-bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point);
+bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int size);
 
 
-bool matchShapeZ (int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point);
+bool matchShapeZ (int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int size);
 
 
 void matchWholeShape(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int &temp, int size);
- 
+
 
 void drawFrame (int pos_x, int pos_y, string str);
-
 
 //Ham ve hinh chu nhat
 void drawRec(int begin_x, int begin_y, int end_x, int end_y, char ch_1, char ch_2);
@@ -75,7 +71,7 @@ void drawMenu(int middle);
 //Ham ve bang
 void drawBoard (int Size, int start_point, int **a);
 
-void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int size, int start_point);
+void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int size, int start_point, int x, int y);
 
 //lam noi bat khung chon menu
 void selectOption (int _x, int _y);
@@ -83,33 +79,62 @@ void selectOption (int _x, int _y);
 //thu hoi bo nho
 void deleleDinamicArr(int **Arr, int size);
 
+void selectLevel (int middle, int &size);
+
+void drawLine(int **&Arr, int size, int start_point);
+
+void play(int **&Arr, int *&sub_arr, int &size);
+
+void Operating_System();
 
 int main()
 {
+    Operating_System();
+    return 0;
+}
+
+void resetBoard (int **&Arr, int size)
+{
+    for (int i = 1; i <= size; i++)
+    {
+        for (int j = 1; j <= size; j++)
+        {
+            if (Arr[i][j] < 0 && Arr[i][j] != -1)
+            {
+                Arr[i][j] = -1;
+            }
+        }
+    }
+}
+
+void Operating_System()
+{
+    int **Arr = NULL, *sub_arr = NULL, size;
+
     cout << "Hay bat full man hinh de co trai nghiem tot nhat! " << endl;
     system("pause");
     system("cls");
+
     srand(time(NULL));
 
-    //Khai bao bien luu kich thuoc man hinh console
-    int columns, rows;
-    int start_point;
-    int pos_menu_x, pos_menu_y, temp = 1;
-    int **Arr = NULL, *sub_arr, size = 8;
+    play(Arr, sub_arr, size);
+}
 
-    calculateColumnsConsole(columns, rows);
-    cout  << "Kich thuoc man hinh la: " << columns;
-    start_point = columns/2 - size * 4;
-    pos_menu_x = columns/2 - 3;
+void play(int **&Arr, int *&sub_arr, int &size)
+{
+    //khoi tao diem bat dau cua bang
+    int middle, rows, pos_menu_x, pos_menu_y, start_point;
+
+    //Tinh kich thuoc console
+    calculateColumnsConsole(middle, rows);
+
+    //Khai bao bien start_point cho bang, pos_menu cho toa do cua menu
+    start_point = middle - size * 4;
+    pos_menu_x = middle - 3;
     pos_menu_y = 21;
 
-    Pikachu.cur_x = start_point;
-    Pikachu.cur_y = 5;
+    drawMenu(middle);
 
-    //Truyen vao vi tri chinh giua man hinh
-    setValueBoard (Arr, sub_arr, size);
-    drawMenu(columns/2);
-    selectOption(pos_menu_x, pos_menu_y);
     bool check = true;
     while (true)
     {
@@ -177,13 +202,19 @@ int main()
         case 21:
             //cho nguoi choi chon do kho
             system("cls");
+            selectLevel (middle, size);
+            setValueBoard (Arr, sub_arr, size);
             drawBoard(size, start_point, Arr);
-            operateBoard(Arr, 1, 1, 1, 1, size, start_point);
-            //de quay lai menu bap esc hoac chon "tro ve"
+            operateBoard(Arr, 1, 1, 1, 1, size, start_point, pos_menu_x, pos_menu_y);
+            play(Arr, sub_arr, size);
             break;
         case 23:
             //dan toi trang dang nhap de nhap tai khoan
             //de quay lai menu bap esc hoac chon "tro ve"
+            system("cls");
+            drawBoard(size, start_point, Arr);
+            operateBoard(Arr, 1, 1, 1, 1, size, start_point, pos_menu_x, pos_menu_y);
+            play(Arr, sub_arr, size);
             break;
         case 25:
             //dan toi trang dang nhap de nhap tai khoan, va hien thi thanh tich nguoi choi
@@ -195,34 +226,274 @@ int main()
         case 29:
             //thoat
             system("cls");
-            return 0;
             break;
         default:
             cout << "Loi he thong, vui long reset va bao voi doi ngu ho tro!" << endl;
-            return 0;
+            break;
     }
-
-    //drawBoard(size, start_point);
-
-
-
-    /*drawRec(start_point, 3, start_point + 8, 7, '*', '*');
-
-    //Dung chtr 0.5s truoc khi thuc hien lenh tiep theo
-    this_thread::sleep_for(chrono::milliseconds(500));
-    drawRec(start_point, 3, start_point + 8, 7, ' ', ' '); */ //ðoaòn code dung ðêÒ xoaì môòt ô trong baÒng, keÌm hiêòu ýìng
-
-    _getch();
     deleleDinamicArr (Arr, size);
     delete[] Arr;
     delete[] sub_arr;
-
-    return 0;
 }
 
 
+void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int size, int start_point, int x, int y)
+{
+    char c;
+    int select_x = -1, select_y = -1, temp = 0;
+    //Khoi tao vung chon dau tien
+    highLightBlock(cur_x , cur_y, a, 143, start_point);
+
+    while (true)
+    {
+        c = _getch();
+        old_x = cur_x;
+        old_y = cur_y;
+         //Di chuyen len
+        if(c == 72 || c == 'w' || c == 'W')
+         {
+             if(cur_y == 1)
+             {
+                 cur_y = size;
+             }
+             else
+             {
+                 cur_y--;
+             }
+         }
+         //Di chuyen xuong
+         if(c == 80 || c == 's' || c == 'S')
+         {
+             if(cur_y == size)
+             {
+                 cur_y = 1;
+             }
+             else
+             {
+                 cur_y++;
+             }
+         }
+        //Di chuyen trai
+         if(c == 75 || c == 'a' || c == 'A')
+        {
+            if(cur_x == 1)
+            {
+                cur_x = size;
+            }
+            else
+            {
+                cur_x--;
+            }
+        }
+        //Di chuyen phai
+        if(c == 77 || c == 'D' || c == 'd')
+        {
+            if(cur_x == size)
+            {
+                cur_x = 1;
+            }
+            else
+            {
+                cur_x++;
+            }
+        }
+        //Tai lai neu man hinh hien thi loi
+        if(c == 'r' || c == 'R')
+        {
+            system("cls");
+            drawBoard(size, start_point, a);
+        }
+        //Enter hoac Space
+        if(c == 13 || c == 32)
+        {
+            if(a[cur_x][cur_y] != -1)
+            {
+                highLightBlock(cur_x, cur_y, a, 177, start_point);
+                if(select_x == -1 && select_y == -1)
+                {
+                    select_x = cur_x;
+                    select_y = cur_y;
+                }
+                else
+                {
+                    if(a[select_x][select_y] == a[cur_x][cur_y])
+                    {
+                        matchWholeShape (cur_x, cur_y, select_x, select_y, a, start_point, temp, size);
+                        //playSound (temp);
+                        //Xoa khung
+                        if(temp == 1)
+                        {
+                            drawRec((start_point + 9 * (select_x - 1)) , (5 + 5 * (select_y - 1)), (start_point + 9 * (select_x - 1) + 8), (9 + 5 * (select_y - 1)), ' ', ' ');
+                            drawRec((start_point + 9 * (cur_x - 1)) , (5 + 5 * (cur_y - 1)), (start_point + 9 * (cur_x - 1) + 8), (9 + 5 * (cur_y - 1)), ' ', ' ');
+
+                            //Danh dau vi tri da xoa va xoa mau
+                            a[select_x][select_y] = -1;
+                            a[cur_x][cur_y] = -1;
+                            highLightBlock(select_x, select_y, a, 0, start_point);
+
+                            //Reset toa do vung chon
+                            select_x = -1;
+                            select_y = -1;
+
+                            temp = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                gotoXY(0, 0);
+                cout << "Khong co Pikachu de chon!";
+                Sleep(300);
+                gotoXY(0, 0);
+                cout << "                         ";
+            }
+
+        }
+        //Esc de thoat
+        if(c == 27)
+        {
+            system("cls");
+            break;
+        }
+        //Ktra xem co di chuyen chua
+        if (cur_x != old_x || cur_y != old_y )
+        {
+            //Tranh to lai mau mac dinh cho o da chon
+            if (select_x == cur_x && select_y == cur_y)
+            {
+                //To mau khac biet khi di lai vung da chon mot lan nua
+                highLightBlock(cur_x, cur_y, a, 199, start_point);
+                c = _getch();
+                if(c == 13 || c == 32 || c == 'b')
+                {
+                    select_x = -1;
+                    select_y = -1;
+                    gotoXY(0, 0);
+                    cout << "Da bo chon";
+                    Sleep (200);
+                    gotoXY(0, 0);
+                    cout << "           ";
+                }
+            }
+            else
+            {
+                //To mau vung con tro
+                highLightBlock(cur_x, cur_y, a, 143, start_point);
+            }
+
+            if (old_x != select_x || old_y != select_y)
+            {
+                //To lai mau mac dinh sau khi di chuyen
+                highLightBlock(old_x, old_y, a, 14, start_point);
+            }
+            else
+            {
+                //Xu ly sau khi di qua lai o da chon mot lan nua
+                highLightBlock(old_x, old_y, a, 177, start_point);
+            }
+            gotoXY(1, 1);
+            cout << cur_x << ", " << cur_y;
+        }
+    }
+    Sleep(100);
+}
+void selectLevel (int middle, int &size)
+{
+    int left, pos_menu_x, pos_menu_y;
+    left = middle - 7;
+    pos_menu_x = middle - 3;
+    pos_menu_y = 21;
+    drawFrame (left, 20, "    KHO");
+    drawFrame (left, 22, " TRUNG BINH");
+    drawFrame (left, 24, "     DE");
+    selectOption(pos_menu_x, pos_menu_y);
+
+    bool check = true;
+    while (true)
+    {
+        if(_kbhit())
+        {
+            char c = _getch();
+            check = true;
+
+            gotoXY(pos_menu_x, pos_menu_y);
+            cout << "__________";
+
+            gotoXY(pos_menu_x, pos_menu_y - 2);
+            cout << "__________";
+
+            if (check)
+            {
+                //Di chuyen len
+                if(c == 72)
+                {
+                    //neu da gap dinh, thi con tro nhay xuong duoi day
+                    if(pos_menu_y == 21)
+                    {
+                        pos_menu_y = 25;
+                    }
+                    else
+                    {
+                        pos_menu_y -= 2;
+                    }
+
+                    selectOption(pos_menu_x, pos_menu_y);
+
+                    //Kiểm tra điều kiện để tránh in dư tại vị trí đáy
+                    if(pos_menu_y != 25)
+                    {
+                        gotoXY(pos_menu_x, pos_menu_y + 2);
+                        cout << "__________";
+                    }
+                    check = false;
+                }
+                //Di chuyen xuong
+                if(c == 80)
+                {
+                    //Neu cham day, con tro tu tro len dau
+                    if(pos_menu_y == 25)
+                    {
+                        pos_menu_y = 21;
+                    }
+                    else
+                    {
+                        pos_menu_y += 2;
+                    }
+
+                    selectOption(pos_menu_x, pos_menu_y);
+                    gotoXY(pos_menu_x, pos_menu_y - 2);
+                    cout << "__________";
+                    check = false;
+                }
+                //Neu chon bang enter hoac space
+                if (c == 13 || c == 32)
+                {
+                        break;
+                }
+            }
+        }
+    }
+
+    switch(pos_menu_y)
+    {
+    case 21:
+        size = 8;
+        break;
+    case 23:
+        size = 6;
+        break;
+    case 25:
+        size = 4;
+        break;
+    default:
+        cout << "Loi he thong!" << endl;
+    }
+    system("cls");
+}
 void SetWindowSize(SHORT width, SHORT height)
 {
+
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
     SMALL_RECT WindowSize;
@@ -259,7 +530,7 @@ void changeColor(int color)
 }
 
 //Ham tinh kich thuoc man hinh console
-void calculateColumnsConsole(int &columns, int &rows)
+void calculateColumnsConsole(int &middle, int &rows)
 {
     //CONSOLE_SCREEN_BUFFER_INFO la mot kieu du lieu chua thong tin ve bo dem man hinh
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -267,7 +538,7 @@ void calculateColumnsConsole(int &columns, int &rows)
     //Ham GetConsoleScreenBufferInfo se lay thong tin bo dem man hinh console, bien csbi se luu thong tin kich thuoc va vi tri cua man hinh console
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 
-    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    middle = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
@@ -301,7 +572,7 @@ void setValueBoard (int **&Arr, int *&sub_arr, int size)
         {
             if (i == 0 || j == 0 || i == size + 1 || j == size + 1)
             {
-                Arr[i][j] = -1;
+                Arr[j][i] = -1;
             }
             else
             {
@@ -309,11 +580,11 @@ void setValueBoard (int **&Arr, int *&sub_arr, int size)
                 if (count < (size * size - sub_size))
                 {
                     //random cac loai pokemon va dem so luong da ramdon
-                    Arr[i][j] = rand() % sub_size;
+                    Arr[j][i] = rand() % sub_size;
                     count++;
 
                     //Dem so luong cac loai pokemon, chi so index trong mang sub_arr ung voi gia tri cua pokemon, con gia tri tai index do se ung voi so luong loai do
-                    sub_arr[Arr[i][j]]++;
+                    sub_arr[Arr[j][i]]++;
                 }
                 //chi random den mot so luong size * size - sub_size sau do ktra xem pokemon nao dang le thi se tang them mot, neu khong con pokemon nao le, se tao so le sau do lam chan
                 else
@@ -324,7 +595,7 @@ void setValueBoard (int **&Arr, int *&sub_arr, int size)
                         if ((sub_arr[p] % 2) != 0 )
                         {
                             //neu so luong cua loai pokemon p la le, se tang len 1 de lam chan
-                            Arr[i][j] = p;
+                            Arr[j][i] = p;
                             sub_arr[p]++;
 
                             //tang bien sub_count de khang dinh rang con pokemon co so luong le
@@ -337,8 +608,8 @@ void setValueBoard (int **&Arr, int *&sub_arr, int size)
                     if (sub_count == count)
                     {
                         //random va dem so luong cac loai pokemon
-                        Arr[i][j] = rand() % sub_size;
-                        sub_arr[Arr[i][j]]++;
+                        Arr[j][i] = rand() % sub_size;
+                        sub_arr[Arr[j][i]]++;
                     }
                     count++;
                 }
@@ -352,7 +623,69 @@ void gotoXY(int x, int y){
 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),{x,y});
 }
 
-bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start_point)
+
+void drawLine(int **&Arr, int size, int start_point)
+{
+    changeColor (FOREGROUND_GREEN);
+    for (int i = 1; i <= size; i++)
+    {
+        for (int j = 1; j <= size; j++)
+        {
+            if (Arr[i][j] == -2)
+            {
+                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                cout << ">>>>>>>>";
+                Sleep (150);
+                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                cout << "        ";
+            }
+
+            if (Arr[i][j] == -3)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                cout << char(166);
+                Sleep (150);
+                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                cout << " ";
+                }
+            }
+        }
+    }
+
+    //Chay lai
+    changeColor (FOREGROUND_BLUE);
+    for (int i = size; i >= 1; i--)
+    {
+        for (int j = size; j >= 1; j--)
+        {
+            if (Arr[i][j] == -2)
+            {
+                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                cout << ">>>>>>>>";
+                Sleep (150);
+                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                cout << "        ";
+            }
+
+            if (Arr[i][j] == -3)
+            {
+                for (int k = 3; k > 0; k--)
+                {
+                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                cout << char(166);
+                Sleep (150);
+                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                cout << " ";
+                }
+            }
+        }
+    }
+    resetBoard (Arr, size);
+}
+
+bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start_point, int size)
 {
     //Kiem tra xem hai toa do co trung nhau khong truoc do trong ham cha
     //Kiem tra co cung hang, hay cung cot hay khong
@@ -365,9 +698,10 @@ bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start
             {
                 if(a[i][cur_y] != -1)
                 {
+                    resetBoard (a, size);
                     return 0;
                 }
-
+                a[i][cur_y] = -2;
             }
             return 1;
         }
@@ -377,8 +711,10 @@ bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start
             {
                 if(a[i][cur_y] != -1)
                 {
+                    resetBoard (a, size);
                     return 0;
                 }
+                a[i][cur_y] = -2;
             }
             return 1;
         }
@@ -392,8 +728,10 @@ bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start
             {
                 if(a[cur_x][i] != -1)
                 {
+                    resetBoard (a, size);
                     return 0;
                 }
+                a[cur_x][i] = -3;
             }
             return 1;
         }
@@ -403,8 +741,10 @@ bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start
             {
                 if (a[cur_x][i] != -1)
                 {
+                    resetBoard (a, size);
                     return 0;
                 }
+                a[cur_x][i] = -3;
             }
             return 1;
         }
@@ -412,7 +752,7 @@ bool matchShapeI(int cur_x, int cur_y, int old_x, int old_y, int **&a, int start
     return 0;
 }
 
-bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point)
+bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int size)
 {
     if (cur_x == old_x || cur_y == old_y)
     {
@@ -569,7 +909,7 @@ bool matchShapeL(int cur_x, int cur_y, int old_x, int old_y, int**& a, int start
 
 }
 
-bool matchShapeZ (int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point)
+bool matchShapeZ (int cur_x, int cur_y, int old_x, int old_y, int**& a, int start_point, int size)
 {
     //Se co 8 truong hop, tuong tu L
     //De ap dung loai Z, hai diem khong duoc thang hang
@@ -929,7 +1269,7 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
             for (; j > old_y; j--)
             {
                 if (a[i][j] != -1)
-                { 
+                {
                     break;
                 }
             }
@@ -964,20 +1304,22 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
          Sleep(300);
          gotoXY (0, 0);
          cout << "                                ";
+
      }
      else
      {
-        if(matchShapeI(cur_x, cur_y, old_x, old_y, a, start_point))
+        if(matchShapeI(cur_x, cur_y, old_x, old_y, a, start_point, size))
         {
             gotoXY (0, 0);
             cout << "Match loai I";
             Sleep(300);
             gotoXY (0, 0);
             cout << "                       ";
+            drawLine( a, size, start_point);
 
             temp = 1;
         }
-        else if(matchShapeL(cur_x, cur_y, old_x, old_y, a, start_point))
+        else if(matchShapeL(cur_x, cur_y, old_x, old_y, a, start_point, size))
         {
             gotoXY (0, 0);
             cout << "Match loai L";
@@ -987,7 +1329,7 @@ bool matchShapeU (int cur_x, int cur_y, int old_x, int old_y, int**& a, int star
 
             temp = 1;
         }
-        else if(matchShapeZ(cur_x, cur_y, old_x, old_y, a, start_point))
+        else if(matchShapeZ(cur_x, cur_y, old_x, old_y, a, start_point, size))
         {
             gotoXY (0, 0);
             cout << "Match loai Z";
@@ -1093,10 +1435,15 @@ void highLightBlock(int x, int y, int **arr, int color, int start_point)
 void drawMenu(int middle)
 {
 
-    int left = middle - 7;
+
+    int x, y, left;
+    left = middle - 7;
+    x = middle - 3;
+    y = 21;
     //Ve tieu de
     changeColor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-    //gotoXY(0, 0);
+    gotoXY(0, 0);
+    cout <<  "  ,'\ ";
     cout <<  R"(
                                                           ,'\
                             _.----.        ____         ,'  _\   ___    ___     ____
@@ -1112,6 +1459,7 @@ void drawMenu(int middle)
                                                         `'                            '-._|
                     )";
 
+
     drawFrame (left, 16, "PIKACHU GAME");
     gotoXY(left + 7, 17);
     cout << "MENU";
@@ -1122,16 +1470,15 @@ void drawMenu(int middle)
     drawFrame (left, 24, " THANH TICH");
     drawFrame (left, 26, "     BXH");
     drawFrame (left, 28, "    THOAT");
-    gotoXY (middle - 10, 32);
-    ;
+    changeColor (BACKGROUND_BLACK || FOREGROUND_WHITE);
+    selectOption(x, y);
 }
 
 
 //Ham ve bang
 void drawBoard (int Size, int start_point, int **a)
 {
-//    SetWindowSize(140, 80);
-//    SetScreenBufferSize (142, 82);
+
     for (int j = 0; j < Size; j++)
     {
         for (int i = 0; i < Size; i++)
@@ -1152,172 +1499,7 @@ void drawBoard (int Size, int start_point, int **a)
     }
 }
 
-void operateBoard (int **&a, int cur_x, int cur_y, int old_x, int old_y, int size, int start_point)
-{
-    char c;
-    int select_x = -1, select_y = -1, temp = 0;
-    //Khoi tao vung chon dau tien
-    highLightBlock(cur_x , cur_y, a, 143, start_point);
 
-    while (true)
-    {
-        c = _getch();
-        old_x = cur_x;
-        old_y = cur_y;
-         //Di chuyen len
-        if(c == 72 || c == 'w' || c == 'W')
-         {
-             if(cur_y == 1)
-             {
-                 cur_y = size;
-             }
-             else
-             {
-                 cur_y--;
-             }
-         }
-         //Di chuyen xuong
-         if(c == 80 || c == 's' || c == 'S')
-         {
-             if(cur_y == size)
-             {
-                 cur_y = 1;
-             }
-             else
-             {
-                 cur_y++;
-             }
-         }
-        //Di chuyen trai
-         if(c == 75 || c == 'a' || c == 'A')
-        {
-            if(cur_x == 1)
-            {
-                cur_x = size;
-            }
-            else
-            {
-                cur_x--;
-            }
-        }
-        //Di chuyen phai
-        if(c == 77 || c == 'D' || c == 'd')
-        {
-            if(cur_x == size)
-            {
-                cur_x = 1;
-            }
-            else
-            {
-                cur_x++;
-            }
-        }
-        //Tai lai neu man hinh hien thi loi
-        if(c == 'r' || c == 'R')
-        {
-            system("cls");
-            drawBoard(size, start_point, a);
-        }
-        //Enter hoac Space
-        if(c == 13 || c == 32)
-        {
-            if(a[cur_x][cur_y] != -1)
-            {
-                highLightBlock(cur_x, cur_y, a, 177, start_point);
-                if(select_x == -1 && select_y == -1)
-                {
-                    select_x = cur_x;
-                    select_y = cur_y;
-                }
-                else
-                {
-                    if(a[select_x][select_y] == a[cur_x][cur_y])
-                    {
-                        matchWholeShape (cur_x, cur_y, select_x, select_y, a, start_point, temp, size);
-                        //playSound (temp);
-                        //Xoa khung
-                        if(temp == 1)
-                        {
-                            drawRec((start_point + 9 * (select_x - 1)) , (5 + 5 * (select_y - 1)), (start_point + 9 * (select_x - 1) + 8), (9 + 5 * (select_y - 1)), ' ', ' ');
-                            drawRec((start_point + 9 * (cur_x - 1)) , (5 + 5 * (cur_y - 1)), (start_point + 9 * (cur_x - 1) + 8), (9 + 5 * (cur_y - 1)), ' ', ' ');
-
-                            //Danh dau vi tri da xoa va xoa mau
-                            a[select_x][select_y] = -1;
-                            a[cur_x][cur_y] = -1;
-                            highLightBlock(select_x, select_y, a, 0, start_point);
-
-                            //Reset toa do vung chon
-                            select_x = -1;
-                            select_y = -1;
-
-                            temp = 0;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                gotoXY(0, 0);
-                cout << "Khong co Pikachu de chon!";
-                Sleep(300);
-                gotoXY(0, 0);
-                cout << "                         ";
-            }
-
-        }
-        //Esc de thoat
-        if(c == 27)
-        {
-            system("cls");
-            break;
-        }
-        //Ktra xem co di chuyen chua
-        if (cur_x != old_x || cur_y != old_y )
-        {
-            //Tranh to lai mau mac dinh cho o da chon
-            if (select_x == cur_x && select_y == cur_y)
-            {
-                //To mau khac biet khi di lai vung da chon mot lan nua
-                highLightBlock(cur_x, cur_y, a, 199, start_point);
-                c = _getch();
-                if(c == 13 || c == 32 || c == 'b')
-                {
-                    select_x = -1;
-                    select_y = -1;
-                    gotoXY(0, 0);
-                    cout << "Da bo chon";
-                    Sleep (200);
-                    gotoXY(0, 0);
-                    cout << "           ";
-                }
-            }
-            else
-            {
-                //To mau vung con tro
-                highLightBlock(cur_x, cur_y, a, 143, start_point);
-            }
-
-            if (old_x != select_x || old_y != select_y)
-            {
-                //To lai mau mac dinh sau khi di chuyen
-                highLightBlock(old_x, old_y, a, 14, start_point);
-            }
-            else
-            {
-                //Xu ly sau khi di qua lai o da chon mot lan nua
-                highLightBlock(old_x, old_y, a, 177, start_point);
-            }
-            gotoXY(1, 1);
-            cout << cur_x << ", " << cur_y;
-        }
-    }
-    //Kiem tra phim esc
-    if(c == 27)
-    {
-        drawMenu (size * 4 + start_point);
-    }
-    Sleep(100);
-}
 
 //lam noi bat khung chon menu
 void selectOption (int _x, int _y)
