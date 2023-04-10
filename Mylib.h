@@ -34,6 +34,7 @@ struct Board
 {
     Coordinate cur, old, select; //Cur la vi tri hien tai, old la vi tri vua di qua, select la vi tri da chon
     int size;  //Kich thuoc bang la size x size
+    int No_pokemon; //Tong so loai Pokemon
     int **Arr; //Mang hai chieu luu cac gia tri cua bang
     int sub_size; //Tong so loai Pokemon
     int *sub_arr;  //Mang luu so luong Pokemon cua tung loai
@@ -86,6 +87,8 @@ void resetBoard (Board& Pikachu);
 void selectLevel (int middle, int &size);
 
 void drawLine (Board& Pikachu, int start_point);
+
+void falseEffect (Board Pikachu, int start_point);
 
 void play(Board& Pikachu);
 
