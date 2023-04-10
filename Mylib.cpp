@@ -144,7 +144,8 @@ void play(Board& Pikachu)
 void operateBoard (Board& Pikachu, int start_point)
 {
     char c;
-    int temp = 0, NumberofPokemon = Pikachu.size * Pikachu.size;
+    int temp = 0;
+    Pikachu.No_pokemon = Pikachu.size * Pikachu.size;
 
     //Khoi tao gia tri ban dau cua cac diem de khoi chay bang
     Pikachu.select = {-1, -1};
@@ -233,10 +234,6 @@ void operateBoard (Board& Pikachu, int start_point)
                         //Da match
                         if(temp == 1)
                         {
-                            //Xoa khung
-                            drawRec((start_point + 9 * (Pikachu.select.x - 1)) , (5 + 5 * (Pikachu.select.y - 1)), (start_point + 9 * (Pikachu.select.x - 1) + 8), (9 + 5 * (Pikachu.select.y - 1)), ' ', ' ');
-                            drawRec((start_point + 9 * (Pikachu.cur.x - 1)) , (5 + 5 * (Pikachu.cur.y - 1)), (start_point + 9 * (Pikachu.cur.x - 1) + 8), (9 + 5 * (Pikachu.cur.y - 1)), ' ', ' ');
-
                             //Danh dau vi tri da xoa va xoa mau
                             Pikachu.Arr[Pikachu.select.x][Pikachu.select.y] = -1;
                             Pikachu.Arr[Pikachu.cur.x][Pikachu.cur.y] = -1;
@@ -244,14 +241,17 @@ void operateBoard (Board& Pikachu, int start_point)
                             //Xoa mau vung da match
                             highLightBlock(Pikachu.select, Pikachu.Arr, 0, start_point);
                             highLightBlock(Pikachu.cur, Pikachu.Arr, 177, start_point);
+
                             //Reset toa do vung chon
                             Pikachu.select = {-1, -1};
+
                             //Tru so luong Pokemon con lai trong bang
-                            NumberofPokemon -= 2;
+                            Pikachu.No_pokemon -= 2;
+
                             //reset gia tri temp
                             temp = 0;
 
-                            if (NumberofPokemon == 0)
+                            if (Pikachu.No_pokemon == 0)
                             {
                                 gotoXY (start_point + Pikachu.size * 4, 30);
                                 cout << "WIN WIN CHICKEN LEGGGG!!!";
@@ -260,7 +260,12 @@ void operateBoard (Board& Pikachu, int start_point)
                                 break;
                             }
                         }
+                        else if (temp == 0)
+                        {
+                            falseEffect (Pikachu, start_point);
+                        }
                     }
+                    else   falseEffect(Pikachu, start_point);
                 }
             }
             else
@@ -563,11 +568,13 @@ void drawLine (Board& Pikachu, int start_point)
         int color;
         if (i % 2 == 0)
         {
+            //Doi mau xanh la
             changeColor (FOREGROUND_GREEN | FOREGROUND_INTENSITY);
             color = 174;
         }
         else
         {
+            //Doi mau xanh duong
             changeColor (FOREGROUND_BLUE | FOREGROUND_INTENSITY);
             color = 177;
         }
@@ -636,6 +643,7 @@ void drawLine (Board& Pikachu, int start_point)
                 }
             }
         }
+        //Lam noi bat cac o duoc match
         highLightBlock(Pikachu.select, Pikachu.Arr, color, start_point);
         highLightBlock(Pikachu.cur, Pikachu.Arr, color, start_point);
         Sleep(100);
@@ -655,8 +663,28 @@ void drawLine (Board& Pikachu, int start_point)
             }
         }
     }
+
+    //Xoa khung sau khi match
+    drawRec((start_point + 9 * (Pikachu.select.x - 1)) , (5 + 5 * (Pikachu.select.y - 1)), (start_point + 9 * (Pikachu.select.x - 1) + 8), (9 + 5 * (Pikachu.select.y - 1)), ' ', ' ');
+    drawRec((start_point + 9 * (Pikachu.cur.x - 1)) , (5 + 5 * (Pikachu.cur.y - 1)), (start_point + 9 * (Pikachu.cur.x - 1) + 8), (9 + 5 * (Pikachu.cur.y - 1)), ' ', ' ');
+
 }
 
+void falseEffect (Board Pikachu, int start_point)
+{
+    int color;
+    for (int i = 0; i < 6; i++)
+    {
+        if (i % 2 ==0)
+            color = 207;
+        else
+            color = 174;
+
+        highLightBlock(Pikachu.select, Pikachu.Arr, color, start_point);
+        highLightBlock(Pikachu.cur, Pikachu.Arr, color, start_point);
+        Sleep(50);
+    }
+}
 bool matchShapeI(Board& Pikachu)
 {
     //Kiem tra xem hai toa do co trung nhau khong truoc do trong ham cha
