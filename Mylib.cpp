@@ -216,30 +216,34 @@ void operateBoard (Board& Pikachu, int start_point)
         //Enter hoac Space
         if(c == 13 || c == 32)
         {
-            if(Pikachu.Arr[Pikachu.cur.x][Pikachu.cur.y] != -1)
+            if(Pikachu.Arr[Pikachu.cur.x][Pikachu.cur.y] != -1)   //Neu o co Pikachu
             {
                 highLightBlock(Pikachu.cur, Pikachu.Arr, 177, start_point);
-                if(Pikachu.select.x == -1 && Pikachu.select.y == -1)
+                if(Pikachu.select.x == -1 && Pikachu.select.y == -1)   //Neu chua luu Pokemon nao
                 {
-                    Pikachu.select.x = Pikachu.cur.x;
+                    Pikachu.select.x = Pikachu.cur.x;   //Luu vi tri Pokemon
                     Pikachu.select.y = Pikachu.cur.y;
                 }
-                else
+                else if(Pikachu.select.x != -1 && Pikachu.select.y != -1)   //Neu trong select da co Pokemon
                 {
+                    //So sanh 2 Pokemon co giong nhau khong
                     if(Pikachu.Arr[Pikachu.select.x][Pikachu.select.y] == Pikachu.Arr[Pikachu.cur.x][Pikachu.cur.y])
                     {
                         matchWholeShape (Pikachu, start_point, temp);
-                        //Xoa khung
+                        //Da match
                         if(temp == 1)
                         {
+                            //Xoa khung
                             drawRec((start_point + 9 * (Pikachu.select.x - 1)) , (5 + 5 * (Pikachu.select.y - 1)), (start_point + 9 * (Pikachu.select.x - 1) + 8), (9 + 5 * (Pikachu.select.y - 1)), ' ', ' ');
                             drawRec((start_point + 9 * (Pikachu.cur.x - 1)) , (5 + 5 * (Pikachu.cur.y - 1)), (start_point + 9 * (Pikachu.cur.x - 1) + 8), (9 + 5 * (Pikachu.cur.y - 1)), ' ', ' ');
 
                             //Danh dau vi tri da xoa va xoa mau
                             Pikachu.Arr[Pikachu.select.x][Pikachu.select.y] = -1;
                             Pikachu.Arr[Pikachu.cur.x][Pikachu.cur.y] = -1;
-                            highLightBlock(Pikachu.select, Pikachu.Arr, 0, start_point);
 
+                            //Xoa mau vung da match
+                            highLightBlock(Pikachu.select, Pikachu.Arr, 0, start_point);
+                            highLightBlock(Pikachu.cur, Pikachu.Arr, 177, start_point);
                             //Reset toa do vung chon
                             Pikachu.select = {-1, -1};
                             //Tru so luong Pokemon con lai trong bang
@@ -288,10 +292,10 @@ void operateBoard (Board& Pikachu, int start_point)
                 {
                     Pikachu.select = {-1, -1};
                     gotoXY(0, 0);
-                    cout << "Da bo chon";
+                    cout << "Da bo chon            ";
                     Sleep (200);
                     gotoXY(0, 0);
-                    cout << "           ";
+                    cout << "                      ";
                 }
             }
             else
@@ -443,7 +447,7 @@ void drawBoard (Board Pikachu, int start_point)
                 drawRec((start_point + 9 * i ), (5 + 5 * j), (start_point + 9 * i + 8), (9 + 5 * j), '-', '|');
 
                 //Chon mau chu
-                changeColor (FOREGROUND_YELLOW | FOREGROUND_INTENSITY);
+                changeColor (Pikachu.Arr[i + 1][j + 1] | FOREGROUND_INTENSITY);
                 gotoXY (start_point + 9 * i  + 4, 5 + 5 * j + 2);
                 cout << char('A' + Pikachu.Arr[i + 1][j + 1]);
             }
@@ -554,63 +558,103 @@ SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),{x,y});
 
 void drawLine (Board& Pikachu, int start_point)
 {
-    changeColor (FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    for (int i = 0; i < 4; i++)
+    {
+        int color;
+        if (i % 2 == 0)
+        {
+            changeColor (FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+            color = 174;
+        }
+        else
+        {
+            changeColor (FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+            color = 177;
+        }
+
+        for (int i = 1; i <= Pikachu.size; i++)
+        {
+            for (int j = 1; j <= Pikachu.size; j++)
+            {
+                if (Pikachu.Arr[i][j] == -2)
+                {
+                    gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                    cout << ">>>>>>>>>";
+                }
+
+                if (Pikachu.Arr[i][j] == -3)
+                {
+                    for (int k = 0; k < 5; k++)
+                    {
+                    gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                    cout << char(166);
+                    }
+                }
+
+                if (Pikachu.Arr[i][j] == -4)
+                {
+                    for (int k = 3; k < 5; k++)
+                    {
+                    gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                    cout << char(166);
+                    }
+                    gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                    cout << ">>>>>";
+                }
+
+                if (Pikachu.Arr[i][j] == -5)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                    gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                    cout << char(166);
+                    }
+                    gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                    cout << ">>>>>";
+                }
+
+                if (Pikachu.Arr[i][j] == -6)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                    gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                    cout << char(166);
+                    }
+                    gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                    cout << "    >>>>>";
+                }
+
+                if (Pikachu.Arr[i][j] == -7)
+                {
+                    for (int k = 3; k < 5; k++)
+                    {
+                    gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
+                    cout << char(166);
+                    }
+                    gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
+                    cout << "    >>>>>";
+                }
+            }
+        }
+        highLightBlock(Pikachu.select, Pikachu.Arr, color, start_point);
+        highLightBlock(Pikachu.cur, Pikachu.Arr, color, start_point);
+        Sleep(100);
+    }
+    resetBoard (Pikachu);
     for (int i = 1; i <= Pikachu.size; i++)
     {
         for (int j = 1; j <= Pikachu.size; j++)
         {
-            if (Pikachu.Arr[i][j] == -2)
+            if (Pikachu.Arr[i][j] == -1)
             {
-                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
-                cout << ">>>>>>>>";
-                Sleep (150);
-                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
-                cout << "        ";
-            }
-
-            if (Pikachu.Arr[i][j] == -3)
-            {
-                for (int k = 0; k < 3; k++)
+                for (int k = 0; k < 5; k++)
                 {
-                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
-                cout << char(166);
-                Sleep (150);
-                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
-                cout << " ";
+                    gotoXY((start_point + 9 * (i - 1)), (5 + 5 * (j - 1)+ k));
+                    cout << "         ";
                 }
             }
         }
     }
-
-    //Chay lai
-    changeColor (FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-    for (int i = Pikachu.size; i >= 1; i--)
-    {
-        for (int j = Pikachu.size; j >= 1; j--)
-        {
-            if (Pikachu.Arr[i][j] == -2)
-            {
-                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
-                cout << ">>>>>>>>";
-                Sleep (150);
-                gotoXY((start_point + 9 * (i - 1)), (7 + 5 * (j - 1)));
-                cout << "        ";
-            }
-
-            if (Pikachu.Arr[i][j] == -3)
-            {
-                for (int k = 3; k > 0; k--)
-                {
-                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
-                cout << char(166);
-                Sleep (150);
-                gotoXY((start_point + 4 + 9 * (i - 1)), (5 + 5 * (j - 1) + k));
-                cout << " ";
-                }
-            }
-        }
-    }
-    resetBoard (Pikachu);
 }
 
 bool matchShapeI(Board& Pikachu)
@@ -692,78 +736,105 @@ bool matchShapeL(Board& Pikachu)
     if(Pikachu.cur.x < Pikachu.select.x && Pikachu.cur.y > Pikachu.select.y)
     {
 
-        //Truong hop 1: ngang - len
+        //Truong hop 1: ngang - len: NGANG
         for (int i = Pikachu.cur.x + 1; i <= Pikachu.select.x; i++)
         {
 
-            //Truong hop 2: len - ngang
+            //Truong hop 2: len - ngang, neu gap o khong trong se vao TH2 de xet tiep
             if (Pikachu.Arr[i][Pikachu.cur.y] != -1)
             {
+                resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau truoc do cho viec Matching
                 for (int t = Pikachu.cur.y - 1; t >= Pikachu.select.y; t--)
                 {
                     if (Pikachu.Arr[Pikachu.cur.x][t] != -1)
                     {
+                        resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau truoc do cho viec Matching
                         return 0;
                     }
+
+                    Pikachu.Arr[Pikachu.cur.x][t] = -3;  //Danh dau duong thang len
                 }
                 for (int p = Pikachu.cur.x + 1; p < Pikachu.select.x; p++)
                 {
                     if (Pikachu.Arr[p][Pikachu.select.y] != -1)
                     {
+                        resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+
+                    Pikachu.Arr[p][Pikachu.select.y] = -2;   //Danh dau de ve duong thang ngang qua
                 }
+
+                Pikachu.Arr[Pikachu.cur.x][Pikachu.select.y] = -7;   //Danh dau giao diem
                 return 1;
             }
+
+            Pikachu.Arr[i][Pikachu.cur.y] = -2;  //Danh dau hang ngang de ve matching
         }
+
+        //LEN
         for (int j = Pikachu.cur.y - 1; j > Pikachu.select.y; j--)
         {
             if (Pikachu.Arr[Pikachu.select.x][j] != -1)
             {
+                resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                 return 0;
             }
         }
+
+        Pikachu.Arr[Pikachu.select.x][Pikachu.cur.y] = -5; //Danh dau giao diem
         return 1;
     }
 
     //Truong hop 3 + 4
     if (Pikachu.cur.x < Pikachu.select.x && Pikachu.cur.y < Pikachu.select.y)
     {
-        {
-
-        //Truong hop 3: ngang - xuong
+        //Truong hop 3: ngang - xuong: NGANG
         for (int i = Pikachu.cur.x + 1; i <= Pikachu.select.x; i++)
         {
 
-            //Truong hop 4: xuong - ngang
+            //Truong hop 4: xuong - ngang, neu gap o khong trong, se xet vao TH4
             if (Pikachu.Arr[i][Pikachu.cur.y] != -1)
             {
+                resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau truoc do cho viec Matching
                 for (int t = Pikachu.cur.y + 1; t <= Pikachu.select.y; t++)
                 {
                     if (Pikachu.Arr[Pikachu.cur.x][t] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[Pikachu.cur.x][t] = -3;   //Danh dau hang doc
                 }
                 for (int p = Pikachu.cur.x + 1; p < Pikachu.select.x; p++)
                 {
                     if (Pikachu.Arr[p][Pikachu.select.y] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[p][Pikachu.select.y] = -2;      //Danh dau hang ngang
                 }
+
+                Pikachu.Arr[Pikachu.cur.x][Pikachu.select.y] = -6;      //Danh dau giao diem
                 return 1;
             }
+
+            Pikachu.Arr[i][Pikachu.cur.y] = -2;  //Danh dau hang ngang
         }
+
+        //XUONG
         for (int j = Pikachu.cur.y + 1; j < Pikachu.select.y; j++)
         {
             if (Pikachu.Arr[Pikachu.select.x][j] != -1)
             {
+                resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                 return 0;
             }
+            Pikachu.Arr[Pikachu.select.x][j] = -3; //Danh dau hang doc
         }
+        Pikachu.Arr[Pikachu.select.x][Pikachu.cur.y] = -4;  //Danh dau giao diem
         return 1;
-        }
     }
 
     //Chia 4 truong hop 5 - 8 cho viec select ben trai cur
@@ -771,39 +842,50 @@ bool matchShapeL(Board& Pikachu)
     //Th 5: Ngang - len
     if (Pikachu.cur.x > Pikachu.select.x && Pikachu.cur.y > Pikachu.select.y)
     {
+        //NGANG
         for(int i = Pikachu.cur.x - 1; i >= Pikachu.select.x; i--)
         {
-
-            //Th6: Len - ngang
+            //Th6: Len - ngang: Neu di ngang gap o khong trong se vao TH6
             if(Pikachu.Arr[i][Pikachu.cur.y] != -1)
             {
+                //LEN
+                resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau
                 for (int t = Pikachu.cur.y - 1; t >= Pikachu.select.y; t--)
                 {
                     if(Pikachu.Arr[Pikachu.cur.x][t] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[Pikachu.cur.x][t] = -3;
                 }
-
+                //NGANG
                 for (int k = Pikachu.cur.x -  1; k > Pikachu.select.x; k--)
                 {
                     if(Pikachu.Arr[k][Pikachu.select.y] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[k][Pikachu.select.y] = -2;      //Danh dau hang ngang
                 }
+                Pikachu.Arr[Pikachu.cur.x][Pikachu.select.y] = -4;   //Danh dau giao diem
                 return 1;
             }
+            Pikachu.Arr[i][Pikachu.cur.y] = -2;     //Danh dau hang ngang
         }
 
-        //Ngang dung --> len
+        //LEN
         for (int j = Pikachu.cur.y - 1; j > Pikachu.select.y; j--)
         {
             if (Pikachu.Arr[Pikachu.select.x][j] != -1)
             {
+                resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                 return 0;
             }
+            Pikachu.Arr[Pikachu.select.x][j] = -3;      //Danh dau hang doc
         }
+        Pikachu.Arr[Pikachu.select.x][Pikachu.cur.y] = -6;     //Danh dau giao diem
         return 1;
     }
 
@@ -811,18 +893,23 @@ bool matchShapeL(Board& Pikachu)
     //Th 7: Ngang - xuong
     if (Pikachu.cur.x > Pikachu.select.x && Pikachu.cur.y < Pikachu.select.y)
     {
+        //NGANG
         for (int i = Pikachu.cur.x - 1; i >= Pikachu.select.x; i--)
         {
 
-            //Th8: xuong - ngang
+            //Th8: xuong - ngang; gap o khong trong se vao TH8
             if(Pikachu.Arr[i][Pikachu.cur.y] != -1)
             {
+                //XUONG
+                resetBoard (Pikachu);   //Reset lai cac vung du lieu da danh dau
                 for (int t = Pikachu.cur.y + 1; t <= Pikachu.select.y; t++)
                 {
                     if (Pikachu.Arr[Pikachu.cur.x][t] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[Pikachu.cur.x][t] = -3;     //Danh dau hang doc
                 }
 
                 //ngang
@@ -830,25 +917,31 @@ bool matchShapeL(Board& Pikachu)
                 {
                     if (Pikachu.Arr[k][Pikachu.select.y] != -1)
                     {
+                        resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                         return 0;
                     }
+                    Pikachu.Arr[k][Pikachu.select.y] = -2;      //Danh dau hang ngang
                 }
+                Pikachu.Arr[Pikachu.cur.x][Pikachu.select.y] = -5;      //Danh dau giao diem
                 return 1;
             }
+            Pikachu.Arr[i][Pikachu.cur.y] = -2;     //Danh dau hang ngang
         }
+        //XUONG
         for (int j = Pikachu.cur.y + 1; j < Pikachu.select.y; j++)
         {
             if(Pikachu.Arr[Pikachu.select.x][j] != -1)
             {
+                resetBoard (Pikachu); //Reset lai cac vung du lieu da danh dau
                 return 0;
             }
+            Pikachu.Arr[Pikachu.select.x][j] = -3;      //Danh dau hang doc
         }
+        Pikachu.Arr[Pikachu.select.x][Pikachu.cur.y] = -7;    //Danh dau giao diem
         return 1;
     }
-
+    resetBoard (Pikachu); //Double check!
     return 0;
-
-
 }
 
 bool matchShapeZ (Board& Pikachu)
@@ -1264,10 +1357,7 @@ void matchWholeShape (Board& Pikachu, int start_point, int& temp)
      if (Pikachu.cur.x == Pikachu.select.x && Pikachu.cur.y == Pikachu.select.y)
      {
          gotoXY (0, 0);
-         cout << "Khong duoc chon lai vi tri cu!";
-         Sleep(300);
-         gotoXY (0, 0);
-         cout << "                                ";
+         cout << "Khong duoc chon lai vi tri cu!   ";
 
      }
      else
@@ -1275,10 +1365,7 @@ void matchWholeShape (Board& Pikachu, int start_point, int& temp)
         if(matchShapeI(Pikachu))
         {
             gotoXY (0, 0);
-            cout << "Match loai I";
-            Sleep(300);
-            gotoXY (0, 0);
-            cout << "                       ";
+            cout << "Match loai I                   ";
             drawLine(Pikachu, start_point);
 
             temp = 1;
@@ -1286,41 +1373,30 @@ void matchWholeShape (Board& Pikachu, int start_point, int& temp)
         else if(matchShapeL(Pikachu))
         {
             gotoXY (0, 0);
-            cout << "Match loai L";
-            Sleep(300);
-            gotoXY (0, 0);
-            cout << "                       ";
+            cout << "Match loai L                  ";
+            drawLine(Pikachu, start_point);
 
             temp = 1;
         }
         else if(matchShapeZ(Pikachu))
         {
             gotoXY (0, 0);
-            cout << "Match loai Z";
-            Sleep(300);
-            gotoXY (0, 0);
-            cout << "                       ";
-
+            cout << "Match loai Z                 ";
+            drawLine(Pikachu, start_point);
             temp = 1;
         }
         else if(matchShapeU(Pikachu))
         {
             gotoXY (0, 0);
-            cout << "Match loai U";
-            Sleep(300);
-            gotoXY (0, 0);
-            cout << "                       ";
+            cout << "Match loai U                   ";
+            drawLine(Pikachu, start_point);
 
             temp = 1;
         }
         else
         {
             gotoXY (0, 0);
-            cout << "Khong thuoc loai matching nao!";
-            Sleep(300);
-            gotoXY (0, 0);
-            cout << "                                  ";
-
+            cout << "Khong thuoc loai matching nao!  ";
             temp = 0;
         }
      }
@@ -1448,15 +1524,15 @@ void drawMenu(int middle)
         drawFrame (left, 16, "PIKACHU GAME");
         gotoXY(left + 7, 17);
         cout << "MENU";
-        Sleep (150);
+        Sleep (100);
         drawFrame (left, 20, "   BAT DAU");
-        Sleep (150);
+        Sleep (100);
         drawFrame (left, 22, "  TIEP TUC");
-        Sleep (150);
+        Sleep (100);
         drawFrame (left, 24, " THANH TICH");
-        Sleep (150);
+        Sleep (100);
         drawFrame (left, 26, "     BXH");
-        Sleep (150);
+        Sleep (100);
         drawFrame (left, 28, "    THOAT");
     }
 
